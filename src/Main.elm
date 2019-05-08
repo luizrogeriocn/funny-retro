@@ -1,22 +1,28 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
-import Html exposing (Html, button, div, h1, input, p, text)
-import Html.Attributes exposing (placeholder, style, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, button, div, form, h1, input, p, text)
+import Html.Attributes exposing (class, placeholder, style, value)
+import Html.Events exposing (onClick, onInput, onSubmit)
 
 
 
 ---- MODEL ----
 
 
+type alias Item =
+    { text : String
+    , votes : Int
+    }
+
+
 type alias Model =
     { successInput : String
     , improveInput : String
     , actionInput : String
-    , successItems : List String
-    , improveItems : List String
-    , actionItems : List String
+    , successItems : List Item
+    , improveItems : List Item
+    , actionItems : List Item
     }
 
 
@@ -43,6 +49,8 @@ type Msg
     | ImproveInputChanged String
     | ActionInputChanged String
     | SuccessInputSubmit
+    | ImproveInputSubmit
+    | ActionInputSubmit
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,7 +66,25 @@ update msg model =
             ( { model | actionInput = value }, Cmd.none )
 
         SuccessInputSubmit ->
-            ( { model | successInput = "", successItems = model.successInput :: model.successItems }, Cmd.none )
+            let
+                item =
+                    { text = model.successInput, votes = 0 }
+            in
+            ( { model | successInput = "", successItems = item :: model.successItems }, Cmd.none )
+
+        ImproveInputSubmit ->
+            let
+                item =
+                    Item model.improveInput 0
+            in
+            ( { model | improveInput = "", improveItems = item :: model.improveItems }, Cmd.none )
+
+        ActionInputSubmit ->
+            let
+                item =
+                    { text = model.actionInput, votes = 0 }
+            in
+            ( { model | actionInput = "", actionItems = item :: model.actionItems }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -73,31 +99,41 @@ view model =
     div []
         [ h1 [] [ text "Funny Retro - MagEdition" ]
         , div [ style "display" "flex", style "justify-content" "space-around" ]
-            [ div [ style "background-color" "green", style "flex" "1" ]
-                [ input
-                    [ placeholder "O que deu certo?"
-                    , value model.successInput
-                    , onInput SuccessInputChanged
+            [ div [ class "column column--success" ]
+                [ form [ onSubmit SuccessInputSubmit ]
+                    [ input
+                        [ placeholder "O que deu certo?"
+                        , value model.successInput
+                        , onInput SuccessInputChanged
+                        ]
+                        []
+                    , button [] [ text "+" ]
                     ]
-                    []
-                , button [ onClick SuccessInputSubmit ] [ text "+" ]
-                , div [] (List.map (\item -> p [] [ text item ]) model.successItems)
+                , div [] (List.map (\item -> p [] [ text item.text ]) model.successItems)
                 ]
-            , div [ style "background-color" "blue", style "flex" "1" ]
-                [ input
-                    [ placeholder "O que podemos melhorar?"
-                    , value model.improveInput
-                    , onInput ImproveInputChanged
+            , div [ class "column column--improve" ]
+                [ form [ onSubmit ImproveInputSubmit ]
+                    [ input
+                        [ placeholder "O que podemos melhorar?"
+                        , value model.improveInput
+                        , onInput ImproveInputChanged
+                        ]
+                        []
+                    , button [] [ text "+" ]
                     ]
-                    []
+                , div [] (List.map (\item -> p [] [ text item.text ]) model.improveItems)
                 ]
-            , div [ style "background-color" "purple", style "flex" "1" ]
-                [ input
-                    [ placeholder "Action items"
-                    , value model.actionInput
-                    , onInput ActionInputChanged
+            , div [ class "column column--action" ]
+                [ form [ onSubmit ActionInputSubmit ]
+                    [ input
+                        [ placeholder "Action items"
+                        , value model.actionInput
+                        , onInput ActionInputChanged
+                        ]
+                        []
+                    , button [] [ text "+" ]
                     ]
-                    []
+                , div [] (List.map (\item -> p [] [ text item.text ]) model.actionItems)
                 ]
             ]
         ]

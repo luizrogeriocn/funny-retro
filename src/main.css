@@ -24,3 +24,20 @@ img {
   margin: 20px 0;
   max-width: 200px;
 }
+
+.column {
+  flex: 1;
+  margin: 3px;
+}
+
+.column--success {
+  border: solid 3px green;
+}
+
+.column--improve {
+  border: solid 3px red;
+}
+
+.column--action {
+  border: solid 3px purple;
+}
